@@ -1,30 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/zeit/next.js/tree/canary/packages/create-next-app).
+This is a reproduction repo for a Vercel Edge Network caching bug. This requires VERCEL_URL as an Environment Variable in your vercel project config
 
-## Getting Started
+Routes:
 
-First, run the development server:
+- /post/<id> is a simple dynamic page route
+- /api/image/<id> returns an image of /post/<id>
+- /image/<id> redirects to /api/image/<id>
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+The bug:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Vercel Edge caches the response of /api/image for as long as the serverless function is "warm". Once the function cold starts again, it does not return the cached response (which is set to last the maximum 365 days)
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+To reproduce:
 
-## Learn More
+- Deploy on vercel
+- hit https://<url>/api/image/1234
+- it should return an image of the route /post/1234
+- the `x-vercel-header` will be MISS initially, on the second request it will be HIT
+- wait until the serverless function is no longer warm (not sure how long this takes, I've only noticed it the day after) and send another request. it should take some time to spin up since it's a cold start, and then the `x-vercel-header` will be MISS
 
-To learn more about Next.js, take a look at the following resources:
+Expected results:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/zeit/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- /api/image/<id> returns the cached response for the full s-max-age length
+- /image/<id> redirect also returns the cached response
