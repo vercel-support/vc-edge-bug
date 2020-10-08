@@ -13,7 +13,7 @@ Vercel Edge caches the response of /api/image for as long as the serverless func
 To reproduce:
 
 - Deploy on vercel
-- hit https://<url>/api/image/1234
+- hit `https://<url>/api/image/1234`
 - it should return an image of the route /post/1234
 - the `x-vercel-header` will be MISS initially, on the second request it will be HIT
 - wait until the serverless function is no longer warm (not sure how long this takes, I've only noticed it the day after) and send another request. it should take some time to spin up since it's a cold start, and then the `x-vercel-header` will be MISS
