@@ -20,5 +20,5 @@ To reproduce:
 
 Expected results:
 
-- /api/image/<id> returns the cached response for the full s-max-age length
-- /image/<id> redirect also returns the cached response
+- `/api/image/<id>` returns the cached response for the full s-max-age length
+- `/image/<id>` redirect also returns the cached response
